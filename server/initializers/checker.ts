@@ -56,11 +56,32 @@ function checkMissedConfig () {
     'instance.default_nsfw_policy', 'instance.robots',
     'services.twitter.username', 'services.twitter.whitelisted'
   ]
+  const requiredAlternatives = [
+    [ // set
+      ['redis.hostname', 'redis.port'], // alternative
+      ['redis.socket']
+    ]
+  ]
   const miss: string[] = []
 
   for (const key of required) {
     if (!config.has(key)) {
       miss.push(key)
+    }
+  }
+  for (const set of requiredAlternatives) {
+    let hasAlternative = false
+    for (const alternative of set) {
+      for (const key of alternative) {
+        if (!config.has(key)) {
+          break
+        }
+        hasAlternative = true
+      }
+      if (hasAlternative) break
+    }
+    if (!hasAlternative) {
+      set[0].forEach((key) => miss.push(key))
     }
   }
 

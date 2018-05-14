@@ -63,12 +63,13 @@ class JobQueue {
     this.jobRedisPrefix = 'bull-' + CONFIG.WEBSERVER.HOST
     const queueOptions = {
       prefix: this.jobRedisPrefix,
-      redis: {
-        host: CONFIG.REDIS.HOSTNAME,
-        port: CONFIG.REDIS.PORT,
-        auth: CONFIG.REDIS.AUTH,
-        db: CONFIG.REDIS.DB
-      }
+      redis: Object.assign({},
+        (CONFIG.REDIS.AUTH && CONFIG.REDIS.AUTH != null) ? { password: CONFIG.REDIS.AUTH } : {},
+        (CONFIG.REDIS.DB) ? { db: CONFIG.REDIS.DB } : {},
+        (CONFIG.REDIS.HOSTNAME && CONFIG.REDIS.PORT) ?
+        { host: CONFIG.REDIS.HOSTNAME, port: CONFIG.REDIS.PORT } :
+        { path: CONFIG.REDIS.SOCKET }
+      )
     }
 
     for (const handlerName of Object.keys(handlers)) {
